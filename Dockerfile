@@ -22,7 +22,7 @@ WORKDIR /app
 # needed for sqlite CGO
 RUN apk add --no-cache sqlite-libs
 COPY --from=go-builder /app/server .
-COPY --from=go-builder /app/templates ./templates
+COPY --from=go-builder /app/ui ./ui
 COPY --from=css-builder /app/static ./static
 EXPOSE 8080
 CMD ["./server"]
