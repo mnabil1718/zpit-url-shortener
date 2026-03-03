@@ -3,3 +3,6 @@ tmp/
 package-lock.json
 static/output.css
 data.db
+data.db-shm
+data.db-wal
+.env

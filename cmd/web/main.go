@@ -3,17 +3,18 @@ package main
 import (
 	"html/template"
 	"io"
-	"os"
 	"strings"
 
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
+	"github.com/mnabil1718/zp.it/internal/config"
 	"github.com/mnabil1718/zp.it/internal/db"
 	"github.com/mnabil1718/zp.it/internal/model"
 )
 
 type App struct {
 	Models *model.Models
+	Config *config.Config
 }
 
 type Template struct {
@@ -38,12 +39,12 @@ func newTemplate() *Template {
 }
 
 func main() {
-	dbp := os.Getenv("DB_PATH")
+	cfg := config.Load()
+	dbp := cfg.DBPath
 	if dbp == "" {
 		dbp = "data.db"
 	}
-
-	reset := os.Getenv("APP_ENV") != "production"
+	reset := cfg.Env != "production"
 
 	db := db.NewSQLiteDB(dbp, reset)
 	defer db.Close()
@@ -53,6 +54,7 @@ func main() {
 
 	app := App{
 		Models: models,
+		Config: cfg,
 	}
 
 	e := echo.New()
