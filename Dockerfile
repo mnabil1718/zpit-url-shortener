@@ -7,7 +7,7 @@ COPY . .
 RUN npx tailwindcss -i ./static/style.css -o ./static/output.css --minify
 
 # Stage 2: build Go binary
-FROM golang:1.23-alpine AS go-builder
+FROM golang:1.25-alpine AS go-builder
 WORKDIR /app
 RUN apk add --no-cache gcc musl-dev
 COPY go.mod go.sum ./
