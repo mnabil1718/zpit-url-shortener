@@ -2,12 +2,19 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
+	"os"
+	"path/filepath"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func NewSQLiteDB(path string, reset bool) *sql.DB {
+	// ensure parent directory exists
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		panic(fmt.Sprintf("failed to create db directory: %v", err))
+	}
 
 	// automatically create file if missing
 	db, err := sql.Open("sqlite3", path)
