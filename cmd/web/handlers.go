@@ -36,7 +36,7 @@ func (a *App) Generate(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save lookup data")
 	}
 
-	s := "http://localhost:8080/" + code
+	s := a.Config.Host + code
 
 	data := Result{
 		Short:    s,
