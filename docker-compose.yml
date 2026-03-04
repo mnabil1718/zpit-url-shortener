@@ -9,7 +9,7 @@ services:
       - APP_ENV=production
       - PORT=8080
       - DB_PATH=/app/data/data.db
-      - HOST="http://localhost:8080"
+      - HOST=http://localhost:8080
       - REDIS_URL=redis:6379
     restart: unless-stopped
     depends_on:
@@ -23,6 +23,11 @@ services:
   redis:
     image: redis:8.6-alpine
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
 volumes:
   sqlite_data:
