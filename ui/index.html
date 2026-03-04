@@ -26,17 +26,9 @@
           id="url"
           type="url"
           name="url"
-          pattern="https://.*"
           required
           placeholder="https://example.com/my-long-url"
           class="block w-full rounded-md bg-white px-4.5 py-3 text-base text-slate-600 outline-1 -outline-offset-1 outline-slate-600/30 placeholder:text-slate-400 focus:outline-2 focus:-outline-offset-2 focus:outline-sky-800"
-          oninput="
-            if (this.validity.patternMismatch) {
-              this.setCustomValidity('URL must start with https://');
-            } else {
-              this.setCustomValidity('');
-            }
-          "
         />
         <button
           type="submit"

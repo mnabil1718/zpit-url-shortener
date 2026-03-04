@@ -2,33 +2,26 @@ package db
 
 import (
 	"database/sql"
-	"log"
-	"os"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func NewSQLiteDB(path string, reset bool) *sql.DB {
 
-	if reset {
-		// empty db each start up
-		if _, err := os.Stat(path); err == nil {
-			err = os.Remove(path)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-	}
-
+	// automatically create file if missing
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
+
+	db.SetMaxOpenConns(1)
+	db.SetConnMaxIdleTime(time.Hour)
 
 	// NOTE: improve concurrency on web apps
 	_, err = db.Exec(`PRAGMA journal_mode = WAL;`)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	schema := `
@@ -42,7 +35,7 @@ func NewSQLiteDB(path string, reset bool) *sql.DB {
 
 	_, err = db.Exec(schema)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	return db

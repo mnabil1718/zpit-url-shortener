@@ -1,6 +1,10 @@
 package model
 
-import "database/sql"
+import (
+	"database/sql"
+
+	"github.com/mnabil1718/zp.it/internal/cache"
+)
 
 type Lookup struct {
 	id     int
@@ -14,11 +18,15 @@ type ILookup interface {
 }
 
 type SQLiteLookup struct {
-	db *sql.DB
+	db    *sql.DB
+	cache cache.ICache
 }
 
-func NewSQliteLookup(db *sql.DB) *SQLiteLookup {
-	return &SQLiteLookup{db: db}
+func NewSQliteLookup(db *sql.DB, cache cache.ICache) *SQLiteLookup {
+	return &SQLiteLookup{
+		db:    db,
+		cache: cache,
+	}
 }
 
 func (l *SQLiteLookup) Insert(origin, code string) error {

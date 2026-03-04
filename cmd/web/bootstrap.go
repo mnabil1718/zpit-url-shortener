@@ -16,6 +16,7 @@ import (
 
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
+	"github.com/mnabil1718/zp.it/internal/cache"
 	"github.com/mnabil1718/zp.it/internal/config"
 	"github.com/mnabil1718/zp.it/internal/db"
 	"github.com/mnabil1718/zp.it/internal/model"
@@ -27,8 +28,8 @@ type App struct {
 	Server *http.Server
 }
 
-func NewApp(cfg *config.Config, db *sql.DB) *App {
-	lu := model.NewSQliteLookup(db)
+func NewApp(cfg *config.Config, db *sql.DB, cache cache.ICache) *App {
+	lu := model.NewSQliteLookup(db, cache)
 	models := model.NewModels(lu)
 	return &App{
 		Models: models,
@@ -76,6 +77,7 @@ func (app *App) setupServer() {
 }
 
 func (app *App) serve() {
+
 	go func() {
 		slog.Info("server is starting on", "port", app.Config.Port, "env", app.Config.Env)
 		if err := app.Server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -107,7 +109,10 @@ func bootstrap() {
 	db := db.NewSQLiteDB(dbp, reset)
 	defer db.Close()
 
-	app := NewApp(cfg, db)
+	rdb := cache.NewRedisClient(cfg)
+	defer rdb.Close()
+
+	app := NewApp(cfg, db, rdb)
 	app.setupServer()
 	app.serve()
 }
