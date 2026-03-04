@@ -1,6 +1,6 @@
 node_modules/
 tmp/
-package-lock.json
+# package-lock.json
 static/output.css
 data.db
 data.db-shm
