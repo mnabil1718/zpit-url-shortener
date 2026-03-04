@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 )
@@ -28,6 +29,8 @@ func Load() *Config {
 	}
 
 	c.Port = port
+
+	fmt.Println("CONFIGS: ", c.DBPath, c.Env, c.Host, c.Port, c.RedisURL)
 
 	return c
 }
