@@ -14,11 +14,12 @@ type RedisClient struct {
 }
 
 func NewRedisClient(cfg *config.Config) *RedisClient {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     cfg.RedisURL,
-		Password: "",
-		DB:       0,
-	})
+
+	opts, err := redis.ParseURL(cfg.RedisURL)
+	if err != nil {
+		panic(err)
+	}
+	rdb := redis.NewClient(opts)
 
 	if err := rdb.Ping(context.Background()).Err(); err != nil {
 		panic(fmt.Sprintf("redis connection error: %v", err))
