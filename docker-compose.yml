@@ -7,14 +7,22 @@ services:
       - sqlite_data:/app/data
     environment:
       - APP_ENV=production
+      - PORT=8080
       - DB_PATH=/app/data/data.db
       - HOST="http://localhost:8080"
+      - REDIS_URL="redis:6379"
     restart: unless-stopped
+    depends_on:
+      - redis
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
       interval: 30s
       timeout: 5s
       retries: 3
+
+  redis:
+    image: redis:8.6-alpine
+    restart: unless-stopped
 
 volumes:
   sqlite_data:
