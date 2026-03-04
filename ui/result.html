@@ -5,27 +5,29 @@
   >
     <h2 class=" text-center text-xl font-bold mb-7">Your link is ready! 🎉</h2>
     <div
-      class="flex flex-col justify-center items-center gap-2 p-5 bg-slate-200 rounded-md"
+      class="flex flex-col justify-center items-stretch gap-2 p-5 bg-slate-200 rounded-md w-full"
     >
       <a
         href="{{ .Short }}"
         target="_blank"
-        class="flex-1 text-sky-800 font-bold text-xl tracking-tight truncate hover:underline mb-3"
+        class="block w-full min-w-0 truncate text-sky-800 font-bold text-xl tracking-tight hover:underline mb-3 text-center"
       >
         {{ .Short | stripScheme }}
       </a>
-      <button
-        onclick="
+      <div class="flex justify-center">
+        <button
+          onclick="
         navigator.clipboard.writeText('{{ .Short }}');
         this.textContent = 'Copied!';
         setTimeout(() => {
         this.textContent = 'Copy Link';
         }, 2000);
       "
-        class="flex-none bg-sky-800 text-white px-4 py-3 text-sm font-semibold rounded-md cursor-pointer transition-colors duration-200"
-      >
-        Copy Link
-      </button>
+          class="bg-sky-800 text-white px-4 py-3 text-sm font-semibold rounded-md cursor-pointer transition-colors duration-200"
+        >
+          Copy Link
+        </button>
+      </div>
     </div>
 
     {{ if .QRCode }}

@@ -1,7 +1,7 @@
 package config
 
 import (
-	"fmt"
+	"log/slog"
 	"os"
 	"strconv"
 )
@@ -30,7 +30,7 @@ func Load() *Config {
 
 	c.Port = port
 
-	fmt.Println("CONFIGS: ", c.DBPath, c.Env, c.Host, c.Port, c.RedisURL)
+	slog.Info("config loaded", "host", c.Host, "db_path", c.DBPath, "env", c.Env, "redis_url", c.RedisURL, "port", c.Port)
 
 	return c
 }
