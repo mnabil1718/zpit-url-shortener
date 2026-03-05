@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log/slog"
 	"time"
 
 	"github.com/mnabil1718/zp.it/internal/cache"
@@ -51,6 +52,7 @@ func (l *SQLiteLookup) GetByCode(code string) (string, error) {
 
 	res, err := l.cache.Get(context.Background(), code)
 	if err == nil {
+		slog.Info("cache hit", "url", res, "code", code)
 		return res, nil
 	}
 
