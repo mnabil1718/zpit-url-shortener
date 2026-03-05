@@ -1,0 +1,19 @@
+{{ define "counter-result" }}
+  <div
+    id="counter-result"
+    class="mt-7 p-5 bg-white rounded-lg text-left border border-slate-300"
+  >
+    <h2 class="text-center text-xl font-bold mb-7">Click Stats</h2>
+    <div
+      class="flex flex-col justify-center items-center gap-2 p-5 bg-slate-100 rounded-md w-full"
+    >
+      <p class="text-slate-500 text-sm font-medium">Total Clicks</p>
+      <span class="text-3xl font-bold text-sky-800">{{ .Clicks }}</span>
+      <p class="text-slate-600 text-xs font-semibold mt-2">
+        Since
+        {{ .Since.Format "Jan 02, 2006" }}
+      </p>
+    </div>
+  </div>
+  <div id="error-display" hx-swap-oob="true"></div>
+{{ end }}

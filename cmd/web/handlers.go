@@ -7,6 +7,7 @@ import (
 	"net/http"
 	urlib "net/url"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v5"
 	"github.com/mnabil1718/zp.it/internal/model"
@@ -18,13 +19,14 @@ func (a *App) Health(c *echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]any{"status": "ok"})
 }
 
-type IndexData struct {
-	Host string
+func (a *App) Index(c *echo.Context) error {
+	return c.Render(http.StatusOK, "index", map[string]any{
+		"Host": a.Config.Host,
+	})
 }
 
-func (a *App) Index(c *echo.Context) error {
-	data := IndexData{Host: a.Config.Host}
-	return c.Render(200, "index", data)
+func (a *App) Counter(c *echo.Context) error {
+	return c.Render(http.StatusOK, "counter", nil)
 }
 
 type Result struct {
@@ -35,6 +37,7 @@ type Result struct {
 
 func (a *App) Generate(c *echo.Context) error {
 	url := c.FormValue("url")
+	url = strings.Trim(url, " ")
 	u, err := urlib.Parse(url)
 	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid URL format")
@@ -90,10 +93,30 @@ func (a *App) Generate(c *echo.Context) error {
 	return c.Render(200, "result", data)
 }
 
-func (a *App) CodeHandler(c *echo.Context) error {
-	cd := c.Param("code")
+type CounterResult struct {
+	Clicks int
+	Since  time.Time
+}
 
-	lkp, err := a.Models.Lookup.GetByCode(cd)
+func (a *App) GetCounterData(c *echo.Context) error {
+	// NOTE: user might input only code or whole short link
+	url := c.FormValue("url")
+	url = strings.Trim(url, " ")
+
+	var code string
+	// Check if full URL or just code
+	if strings.Contains(url, "://") || strings.Contains(url, ".") {
+		u, err := urlib.Parse(url)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "Invalid URL format")
+		}
+
+		code = strings.TrimPrefix(u.Path, "/")
+	} else {
+		code = url
+	}
+
+	lkp, err := a.Models.Lookup.GetByCode(code)
 	if err != nil {
 
 		if errors.Is(err, model.ErrNotFound) {
@@ -103,5 +126,28 @@ func (a *App) CodeHandler(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Cannot lookup URL data")
 	}
 
-	return c.Redirect(http.StatusFound, lkp.Origin)
+	data := CounterResult{
+		Clicks: lkp.Clicks,
+		Since:  lkp.CreatedAt,
+	}
+	return c.Render(200, "counter-result", data)
+}
+
+func (a *App) CodeHandler(c *echo.Context) error {
+	cd := c.Param("code")
+
+	origin, err := a.Models.Lookup.GetOriginByCode(cd)
+	if err != nil {
+
+		if errors.Is(err, model.ErrNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, "Short link is not found")
+		}
+
+		return echo.NewHTTPError(http.StatusInternalServerError, "Cannot lookup URL data")
+	}
+
+	// runs in goroutine, non-blocking redirect
+	go a.Models.Lookup.IncrementClicks(cd)
+
+	return c.Redirect(http.StatusFound, origin)
 }

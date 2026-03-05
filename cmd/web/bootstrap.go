@@ -70,8 +70,10 @@ func (app *App) setupServer() {
 
 	e.GET("/", app.Index)
 	e.GET("/health", app.Health)
-	e.GET("/:code", app.CodeHandler)
+	e.GET("/counter", app.Counter)
+	e.POST("/counter", app.GetCounterData)
 	e.POST("/generate", app.Generate)
+	e.GET("/:code", app.CodeHandler)
 
 	app.Server = &http.Server{
 		Addr:    fmt.Sprintf(":%d", app.Config.Port),

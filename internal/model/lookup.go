@@ -21,7 +21,9 @@ type Lookup struct {
 
 type ILookup interface {
 	Insert(origin, code string) error
+	GetOriginByCode(code string) (string, error) // faster for redirect
 	GetByCode(code string) (*Lookup, error)
+	IncrementClicks(code string) error
 }
 
 type SQLiteLookup struct {
@@ -58,25 +60,16 @@ func (l *SQLiteLookup) Insert(origin, code string) error {
 		return err
 	}
 
-	if err := l.cache.Set(context.Background(), code, lkp, 300*time.Second); err != nil {
+	if err := l.cache.Set(context.Background(), code, lkp.Origin, 300*time.Second); err != nil {
 		return err
 	}
 
 	return nil
 }
 
+// No cache hit here because cache only stores origin url
 func (l *SQLiteLookup) GetByCode(code string) (*Lookup, error) {
 	var lkp Lookup
-
-	err := l.cache.Get(context.Background(), code, &lkp)
-	if err == nil {
-		slog.Info("cache hit", "url", lkp.Origin, "code", lkp.Code, "clicks", lkp.Clicks, "created_at", lkp.CreatedAt)
-		return &lkp, nil
-	}
-
-	if !errors.Is(err, cache.ErrCacheMiss) {
-		return nil, err
-	}
 
 	SQL := `select id, origin, code, clicks, created_at from lookup where code = ? limit 1`
 	if err := l.db.QueryRow(SQL, code).Scan(
@@ -93,10 +86,38 @@ func (l *SQLiteLookup) GetByCode(code string) (*Lookup, error) {
 		return nil, err
 	}
 
-	// save back to cache
-	if err = l.cache.Set(context.Background(), code, lkp, 300*time.Second); err != nil {
-		return nil, err
+	return &lkp, nil
+}
+
+func (l *SQLiteLookup) GetOriginByCode(code string) (string, error) {
+	SQL := `select origin from lookup where code = ? limit 1`
+	var origin string
+
+	v, err := l.cache.Get(context.Background(), code)
+	if err == nil {
+		return v, nil
 	}
 
-	return &lkp, nil
+	if !errors.Is(err, cache.ErrCacheMiss) {
+		return "", err
+	}
+
+	if err := l.db.QueryRow(SQL, code).Scan(&origin); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", ErrNotFound
+		}
+
+		return "", err
+	}
+
+	return origin, nil
+}
+
+func (l *SQLiteLookup) IncrementClicks(code string) error {
+	SQL := `update lookup set clicks = clicks + 1 where code = ?`
+	if _, err := l.db.Exec(SQL, code); err != nil {
+		return err
+	}
+
+	return nil
 }

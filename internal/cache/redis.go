@@ -2,7 +2,6 @@ package cache
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -30,25 +29,20 @@ func NewRedisClient(cfg *config.Config) *RedisClient {
 }
 
 func (r *RedisClient) Set(ctx context.Context, k string, v any, ttl time.Duration) error {
-	data, err := json.Marshal(v)
-	if err != nil {
-		return err
-	}
-
-	return r.client.Set(ctx, k, data, ttl).Err()
+	return r.client.Set(ctx, k, v, ttl).Err()
 }
 
-func (r *RedisClient) Get(ctx context.Context, k string, dest any) error {
-	v, err := r.client.Get(ctx, k).Bytes()
+func (r *RedisClient) Get(ctx context.Context, k string) (string, error) {
+	v, err := r.client.Get(ctx, k).Result()
 	if err == redis.Nil {
-		return ErrCacheMiss
+		return "", ErrCacheMiss
 	}
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return json.Unmarshal(v, dest)
+	return v, nil
 }
 
 func (r *RedisClient) Delete(ctx context.Context, k string) error {
