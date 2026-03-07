@@ -1,3 +1,4 @@
+<img width="1848" height="917" alt="Screenshot from 2026-03-07 15-59-54" src="https://github.com/user-attachments/assets/410e4fee-d796-4a2e-a370-ed76113d2290" />
 # ⚡ Zp.it — Fast, Simplified URL Shortener
 
 > *Read: "Zip it!"* — A free, fast, and open-source URL shortener. No logins, no subscriptions, no nonsense.
@@ -14,25 +15,29 @@
 [https://zpit.up.railway.app](https://zpit.up.railway.app)
 
 ## Screenshots
-> Home
+- Home
 <img width="1848" height="917" alt="Screenshot from 2026-03-07 15-59-54" src="https://github.com/user-attachments/assets/410e4fee-d796-4a2e-a370-ed76113d2290" />
 
+- Result
+<img width="1829" height="917" alt="Screenshot from 2026-03-07 16-03-07" src="https://github.com/user-attachments/assets/9ad593f2-4863-45fd-a848-04529e94f74e" />
 
-
----
-
-## ✨ Features
-
-- **⚡ Fast Lookup & Redirect** — Redis-powered caching ensures near-instant redirects with minimal latency
-- **📊 Click Counter** — Track how many times each shortlink has been visited in real time
-- **✏️ Custom Aliases** — Choose your own memorable slug instead of a random one (e.g. `zp.it/my-link`)
-- **📱 QR Code Generator** — Instantly generate a scannable QR code for any shortened link
-- **🌐 No Account Required** — Just paste, shorten, and share. Zero friction.
-- **🖥️ Hypermedia-driven UI** — Snappy, SPA-like experience powered by HTMX — no heavy JavaScript framework
+- Click counter
+<img width="1829" height="917" alt="Screenshot from 2026-03-07 16-03-49" src="https://github.com/user-attachments/assets/e2a36f8d-0841-445c-a48d-6aaf839251c4" />
 
 ---
 
-## 🛠️ Tech Stack
+## Features
+
+- **Fast Lookup & Redirect** — Redis-powered caching ensures near-instant redirects with minimal latency
+- **Click Counter** — Track how many times each shortlink has been visited in real time
+- **Custom Aliases** — Choose your own memorable slug instead of a random one (e.g. `zp.it/my-link`)
+- **QR Code Generator** — Instantly generate a scannable QR code for any shortened link
+- **No Account Required** — Just paste, shorten, and share. Zero friction.
+- **Hypermedia-driven UI** — Snappy, SPA-like experience powered by HTMX — no heavy JavaScript framework
+
+---
+
+## Tech Stack
 
 | Layer     | Technology                          |
 |-----------|-------------------------------------|
@@ -45,7 +50,7 @@
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -96,7 +101,7 @@ docker compose up
 
 ---
 
-## 📖 Usage
+## Usage
 
 ### Shorten a URL
 1. Paste any long URL into the input field
@@ -114,7 +119,7 @@ Navigate to `/counter` or click **"See shortlink click counter"** to look up cli
 
 ---
 
-## 🗂️ Project Structure
+## Project Structure
 ```
 zp.it/
 ├── cmd/
@@ -134,7 +139,7 @@ zp.it/
 ```
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are what make open source great — all kinds of input are welcome, whether it's a bug report, a feature idea, or a pull request!
 
@@ -155,7 +160,7 @@ Contributions are what make open source great — all kinds of input are welcome
 
 Please make sure your code is formatted with `gofmt` and passes any existing tests before submitting.
 
-### Ideas for Contributions
+### List for Todos
 - [ ] Expiring / time-limited links
 - [ ] Link management dashboard
 - [ ] REST API with JSON responses
@@ -163,9 +168,9 @@ Please make sure your code is formatted with `gofmt` and passes any existing tes
 
 ---
 
-## 🐛 Reporting Issues
+## Reporting Issues
 
-Found a bug? Have a feature request? [Open an issue](https://github.com/yourusername/zp.it/issues) and describe it clearly. Include steps to reproduce for bugs if possible.
+Found a bug? Have a feature request? [Open an issue](https://github.com/mnabil1718/zp.it/issues) and describe it clearly. Include steps to reproduce for bugs if possible.
 
 ---
 
