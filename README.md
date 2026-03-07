@@ -10,13 +10,12 @@
 
 ---
 
-## 📸 Screenshots
+## Live Demo
+[https://zpit.up.railway.app](https://zpit.up.railway.app)
 
-<!-- TODO: Add screenshots -->
-| Home | Result & QR Code | Click Counter |
-|------|-----------------|---------------|
-| ![Home]() | ![Result]() | ![Counter]() |
+## Screenshots
 
+![Home](<img width="1848" height="917" alt="Screenshot from 2026-03-07 15-59-54" src="https://github.com/user-attachments/assets/410e4fee-d796-4a2e-a370-ed76113d2290" />)
 ---
 
 ## ✨ Features
