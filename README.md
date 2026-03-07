@@ -179,4 +179,4 @@ This project is licensed under the **MIT License** — see the [LICENSE](./LICEN
 - [mattn/go-sqlite3](https://github.com/mattn/go-sqlite3) for SQLite bindings
 
 ---
-<p align="center">Made with ❤️ and Go · <a href="https://zp.it">zp.it</a></p>
+<p align="center">Made with HTMX and Go · <a href="https://zpit.up.railway.app">zp.it</a></p>
