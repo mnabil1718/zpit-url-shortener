@@ -1,4 +1,5 @@
 <img width="1848" height="917" alt="Screenshot from 2026-03-07 15-59-54" src="https://github.com/user-attachments/assets/410e4fee-d796-4a2e-a370-ed76113d2290" />
+
 # ⚡ Zp.it — Fast, Simplified URL Shortener
 
 > *Read: "Zip it!"* — A free, fast, and open-source URL shortener. No logins, no subscriptions, no nonsense.
