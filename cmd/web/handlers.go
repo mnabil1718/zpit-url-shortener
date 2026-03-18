@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
 	urlib "net/url"
@@ -11,6 +10,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v5"
+	"github.com/mnabil1718/zp.it/internal/helpers"
 	"github.com/mnabil1718/zp.it/internal/model"
 	qrlib "github.com/mnabil1718/zp.it/internal/qr"
 	"github.com/mnabil1718/zp.it/internal/shortener"
@@ -38,17 +38,9 @@ type Result struct {
 
 func (a *App) Generate(c *echo.Context) error {
 	url := c.FormValue("url")
-	url = strings.Trim(url, " ")
-	u, err := urlib.Parse(url)
-	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid URL format")
-	}
 
-	// ensure host has a valid TLD
-	host := u.Hostname()
-	parts := strings.Split(host, ".")
-	if len(parts) < 2 || parts[len(parts)-1] == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid URL format")
+	if err := helpers.ValidateURL(url); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	alias := c.FormValue("alias")
@@ -68,10 +60,11 @@ func (a *App) Generate(c *echo.Context) error {
 
 	if err := a.Models.Lookup.Insert(url, code); err != nil {
 		if errors.Is(err, model.ErrAlreadyExists) {
+			slog.Error("Cannot increment clicks", "code", http.StatusConflict, "error", err)
 			return echo.NewHTTPError(http.StatusConflict, "Code alias already exists")
 		}
 
-		fmt.Println(err)
+		slog.Error("Failed to save lookup data", "code", http.StatusInternalServerError, "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save lookup data")
 	}
 
@@ -91,7 +84,7 @@ func (a *App) Generate(c *echo.Context) error {
 		data.QRCode = base64.StdEncoding.EncodeToString(png)
 	}
 
-	return c.Render(200, "result", data)
+	return c.Render(http.StatusOK, "result", data)
 }
 
 type CounterResult struct {
@@ -133,7 +126,7 @@ func (a *App) GetCounterData(c *echo.Context) error {
 	}
 
 	c.Response().Header().Set("Cache-Control", "no-store")
-	return c.Render(200, "counter-result", data)
+	return c.Render(http.StatusOK, "counter-result", data)
 }
 
 func (a *App) CodeHandler(c *echo.Context) error {

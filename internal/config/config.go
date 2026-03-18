@@ -1,6 +1,8 @@
 package config
 
 import (
+	"errors"
+	"fmt"
 	"log/slog"
 	"os"
 	"strconv"
@@ -14,6 +16,19 @@ type Config struct {
 	Port     int    // for http server PORT config
 }
 
+func (c *Config) validate() error {
+	if c.Host == "" {
+		return errors.New("HOST is required")
+	}
+	if c.DBPath == "" {
+		return errors.New("DB_PATH is required")
+	}
+	if c.Port == 0 {
+		return errors.New("PORT is required")
+	}
+	return nil
+}
+
 func Load() *Config {
 	c := &Config{}
 
@@ -25,10 +40,14 @@ func Load() *Config {
 
 	port, err := strconv.Atoi(sp)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("invalid PORT value %q: %v", sp, err))
 	}
 
 	c.Port = port
+
+	if err = c.validate(); err != nil {
+		panic(err.Error())
+	}
 
 	slog.Info("config loaded", "host", c.Host, "db_path", c.DBPath, "env", c.Env, "redis_url", c.RedisURL, "port", c.Port)
 
