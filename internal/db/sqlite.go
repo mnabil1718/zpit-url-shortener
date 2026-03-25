@@ -23,12 +23,22 @@ func NewSQLiteDB(path string, reset bool) *sql.DB {
 	}
 
 	db.SetMaxOpenConns(1)
-	db.SetConnMaxIdleTime(time.Hour)
+	db.SetMaxIdleConns(1)
+	db.SetConnMaxLifetime(time.Hour)
+	db.SetConnMaxIdleTime(30 * time.Minute)
 
-	// NOTE: improve concurrency on web apps
-	_, err = db.Exec(`PRAGMA journal_mode = WAL;`)
-	if err != nil {
-		panic(err)
+	pragmas := []string{
+		`PRAGMA journal_mode = WAL;`,    // WAL improve concurrency on web apps
+		`PRAGMA synchronous = NORMAL;`,  // safe with WAL, much faster than FULL
+		`PRAGMA cache_size = -64000;`,   // 64MB page cache
+		`PRAGMA temp_store = MEMORY;`,   // temp tables in RAM
+		`PRAGMA mmap_size = 268435456;`, // 256MB memory-mapped I/O
+	}
+
+	for _, p := range pragmas {
+		if _, err := db.Exec(p); err != nil {
+			panic(fmt.Sprintf("failed to set pragma %s: %v", p, err))
+		}
 	}
 
 	schema := `
@@ -40,6 +50,7 @@ func NewSQLiteDB(path string, reset bool) *sql.DB {
 			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
         CREATE INDEX IF NOT EXISTS idx_lookup_code ON lookup(code);
+		CREATE INDEX IF NOT EXISTS idx_lookup_created_at ON lookup(created_at);
     `
 
 	_, err = db.Exec(schema)

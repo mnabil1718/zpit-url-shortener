@@ -104,6 +104,11 @@ func (l *SQLiteLookup) GetOriginByCode(code string) (string, error) {
 		return "", err
 	}
 
+	// NOTE: uses longer TTL for hotlinks
+	if err = l.cache.Set(context.Background(), code, origin, 24*time.Hour); err != nil {
+		return "", err
+	}
+
 	return origin, nil
 }
 
