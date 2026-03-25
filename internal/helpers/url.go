@@ -11,7 +11,6 @@ var (
 )
 
 func ValidateURL(url string) error {
-
 	url = strings.Trim(url, " ")
 	u, err := urlib.Parse(url)
 	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
