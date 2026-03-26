@@ -124,6 +124,21 @@ func (app *App) serve() {
 	}
 }
 
+func (app *App) runClickReconcileScheduler() {
+	slog.Info("starting click reconcile scheduler")
+	go func() {
+		ticker := time.NewTicker(30 * time.Second)
+		defer ticker.Stop()
+		for range ticker.C {
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			if err := app.Models.Lookup.ReconcileClicks(ctx); err != nil {
+				slog.Error("click reconciliation failed", "error", err)
+			}
+			cancel()
+		}
+	}()
+}
+
 func bootstrap() {
 	cfg := config.Load()
 
@@ -141,5 +156,6 @@ func bootstrap() {
 
 	app := NewApp(cfg, db, rdb)
 	app.setupServer()
+	app.runClickReconcileScheduler()
 	app.serve()
 }

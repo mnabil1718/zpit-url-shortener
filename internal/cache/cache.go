@@ -12,6 +12,7 @@ type ICache interface {
 	Delete(ctx context.Context, k string) error
 	GetDel(ctx context.Context, k string) (string, error)
 	Inc(ctx context.Context, k string) error
+	Keys(ctx context.Context, pattern string) ([]string, error)
 	Close() error
 }
 

@@ -4,6 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"log/slog"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/mattn/go-sqlite3"
@@ -27,6 +31,8 @@ type ILookup interface {
 	GetByCode(code string) (*Lookup, error)
 	// increment clicks by 1 by code. No caching
 	IncrementClicks(code string) error
+	// Reconcile cache to DB for batch click counter
+	ReconcileClicks(ctx context.Context) error
 }
 
 type SQLiteLookup struct {
@@ -113,10 +119,39 @@ func (l *SQLiteLookup) GetOriginByCode(code string) (string, error) {
 }
 
 func (l *SQLiteLookup) IncrementClicks(code string) error {
-	SQL := `update lookup set clicks = clicks + 1 where code = ?`
-	if _, err := l.db.Exec(SQL, code); err != nil {
+	return l.cache.Inc(context.Background(), fmt.Sprintf("clicks:%s", code))
+}
+
+func (l *SQLiteLookup) ReconcileClicks(ctx context.Context) error {
+	keys, err := l.cache.Keys(ctx, "clicks:*")
+	if err != nil {
 		return err
 	}
 
-	return nil
+	if len(keys) == 0 {
+		return nil
+	}
+
+	slog.Info("click reconciliation run", "pending_keys", len(keys))
+
+	tx, err := l.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	for _, k := range keys {
+		v, err := l.cache.GetDel(ctx, k)
+		if err != nil {
+			continue
+		}
+		cn, err := strconv.ParseInt(v, 10, 64)
+		if err != nil || cn == 0 {
+			continue
+		}
+		code := strings.TrimPrefix(k, "clicks:")
+		tx.ExecContext(ctx, `UPDATE lookup SET clicks = clicks + ? WHERE code = ?`, cn, code)
+	}
+
+	return tx.Commit()
 }

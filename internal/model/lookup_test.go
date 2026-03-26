@@ -1,6 +1,7 @@
 package model
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"testing"
@@ -133,13 +134,14 @@ func TestLookupIncrementClicks_Success(t *testing.T) {
 	db := newTestDB(t)
 	mc := new(cache.MockCache)
 	mc.On("Set", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
-
+	mc.On("Inc", mock.Anything, "clicks:abc").Return(nil)
+	mc.On("Keys", mock.Anything, "clicks:*").Return([]string{"clicks:abc"}, nil)
+	mc.On("GetDel", mock.Anything, "clicks:abc").Return("2", nil)
 	lu := NewSQliteLookup(db, mc)
 	require.NoError(t, lu.Insert("https://example.com", "abc"))
-
 	require.NoError(t, lu.IncrementClicks("abc"))
 	require.NoError(t, lu.IncrementClicks("abc"))
-
+	require.NoError(t, lu.ReconcileClicks(context.Background()))
 	lkp, err := lu.GetByCode("abc")
 	require.NoError(t, err)
 	assert.Equal(t, 2, lkp.Clicks)
@@ -148,9 +150,8 @@ func TestLookupIncrementClicks_Success(t *testing.T) {
 func TestIncrementClicks_UnknownCode(t *testing.T) {
 	db := newTestDB(t)
 	mc := new(cache.MockCache)
-
+	mc.On("Inc", mock.Anything, "clicks:ghost").Return(nil)
 	lu := NewSQliteLookup(db, mc)
-	// SQLite UPDATE on a missing row is not an error, it just affects 0 rows.
 	err := lu.IncrementClicks("ghost")
 	assert.NoError(t, err)
 }

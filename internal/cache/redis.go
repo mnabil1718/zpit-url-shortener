@@ -64,6 +64,10 @@ func (r *RedisClient) Inc(ctx context.Context, k string) error {
 	return r.client.Incr(ctx, k).Err()
 }
 
+func (r *RedisClient) Keys(ctx context.Context, pattern string) ([]string, error) {
+	return r.client.Keys(ctx, pattern).Result()
+}
+
 func (r *RedisClient) Close() error {
 	return r.client.Close()
 }
