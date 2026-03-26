@@ -45,8 +45,23 @@ func (r *RedisClient) Get(ctx context.Context, k string) (string, error) {
 	return v, nil
 }
 
+func (r *RedisClient) GetDel(ctx context.Context, k string) (string, error) {
+	v, err := r.client.GetDel(ctx, k).Result() // avoid race condition for goroutines
+	if err == redis.Nil {
+		return "", ErrCacheMiss
+	}
+	if err != nil {
+		return "", err
+	}
+	return v, nil
+}
+
 func (r *RedisClient) Delete(ctx context.Context, k string) error {
 	return r.client.Del(ctx, k).Err()
+}
+
+func (r *RedisClient) Inc(ctx context.Context, k string) error {
+	return r.client.Incr(ctx, k).Err()
 }
 
 func (r *RedisClient) Close() error {

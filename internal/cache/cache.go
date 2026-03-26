@@ -10,6 +10,8 @@ type ICache interface {
 	Set(ctx context.Context, k string, v any, ttl time.Duration) error
 	Get(ctx context.Context, k string) (string, error)
 	Delete(ctx context.Context, k string) error
+	GetDel(ctx context.Context, k string) (string, error)
+	Inc(ctx context.Context, k string) error
 	Close() error
 }
 
